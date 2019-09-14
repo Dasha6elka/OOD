@@ -1,0 +1,3 @@
+Triangle: P=0; S=0
+Rectangle: P=0; S=0
+Circle: P=314; S=7853
