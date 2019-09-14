@@ -1,5 +1,7 @@
 package main.java.canvas;
 
+import main.java.Point;
+
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
@@ -13,22 +15,22 @@ public class J2DCanvas implements Canvas, CanvasPanelDrawable {
     private final List<CircleShape> circles = new ArrayList<>();
 
     @Override
-    public void drawLine(main.java.Point from, main.java.Point to, int lineColor) {
+    public void drawLine(Point from, Point to, int lineColor) {
         shapes.add(new ShapeObject(new Line2D.Double(from.x, from.y, to.x, to.y), lineColor));
     }
 
     @Override
-    public void fillPolygon(List<main.java.Point> points, int fillColor) {
+    public void fillPolygon(List<Point> points, int fillColor) {
         polygons.add(new PolygonShape(points, fillColor));
     }
 
     @Override
-    public void drawCircle(main.java.Point center, double radius, int lineColor) {
+    public void drawCircle(Point center, double radius, int lineColor) {
         shapes.add(new ShapeObject(new Ellipse2D.Double(center.x, center.y, radius, radius), lineColor));
     }
 
     @Override
-    public void fillCircle(main.java.Point center, double radius, int fillColor) {
+    public void fillCircle(Point center, double radius, int fillColor) {
         circles.add(new CircleShape(center, radius, fillColor));
     }
 
@@ -41,7 +43,7 @@ public class J2DCanvas implements Canvas, CanvasPanelDrawable {
         polygons.forEach(polygon -> {
             g2d.setColor(getHexColor(polygon.color));
             Path2D path = new Path2D.Double();
-            List<main.java.Point> points = polygon.points;
+            List<Point> points = polygon.points;
             path.moveTo(points.get(0).x, points.get(0).y);
             points.stream().skip(1).forEach(point -> path.lineTo(point.x, point.y));
             path.closePath();
@@ -49,18 +51,18 @@ public class J2DCanvas implements Canvas, CanvasPanelDrawable {
         });
         circles.forEach(circle -> {
             g2d.setColor(getHexColor(circle.color));
-            main.java.Point center = circle.center;
+            Point center = circle.center;
             double radius = circle.radius;
             g2d.fill(new Ellipse2D.Double(center.x, center.y, radius, radius));
         });
     }
 
     private static class CircleShape {
-        final main.java.Point center;
+        final Point center;
         final double radius;
         final int color;
 
-        private CircleShape(main.java.Point center, double radius, int color) {
+        private CircleShape(Point center, double radius, int color) {
             this.center = center;
             this.radius = radius;
             this.color = color;
@@ -68,10 +70,10 @@ public class J2DCanvas implements Canvas, CanvasPanelDrawable {
     }
 
     private static class PolygonShape {
-        final List<main.java.Point> points;
+        final List<Point> points;
         final int color;
 
-        private PolygonShape(List<main.java.Point> points, int color) {
+        private PolygonShape(List<Point> points, int color) {
             this.points = points;
             this.color = color;
         }

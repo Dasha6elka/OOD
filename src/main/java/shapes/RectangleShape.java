@@ -4,6 +4,7 @@ import main.java.canvas.Canvas;
 import main.java.Point;
 
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Arrays;
 
 public class RectangleShape extends Shape {
@@ -37,6 +38,11 @@ public class RectangleShape extends Shape {
         canvas.drawLine(mBottomRightVertex, leftBottom, mOutlineColor);
         canvas.drawLine(leftBottom, mTopLeftVertex, mOutlineColor);
         canvas.fillPolygon(Arrays.asList(mTopLeftVertex, rightTop, mBottomRightVertex, leftBottom), mFillColor);
+    }
+
+    @Override
+    public void print(FileWriter out) throws IOException {
+
     }
 
     @Override

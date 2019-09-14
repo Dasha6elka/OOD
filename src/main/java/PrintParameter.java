@@ -25,9 +25,13 @@ class PrintParameter extends Shape {
 
     @Override
     public void draw(Canvas canvas, FileWriter out) throws IOException {
+        mShape.draw(canvas, out);
+    }
+
+    @Override
+    public void print(FileWriter out) throws IOException {
         String output = getName() + ": P=" + getPerimeter() + "; S=" + getArea() + "\n";
         out.write(output);
-        mShape.draw(canvas, out);
     }
 
     @Override

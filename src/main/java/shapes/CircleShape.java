@@ -4,6 +4,7 @@ import main.java.canvas.Canvas;
 import main.java.Point;
 
 import java.io.FileWriter;
+import java.io.IOException;
 
 public class CircleShape extends Shape {
     private int mRadius;
@@ -30,6 +31,11 @@ public class CircleShape extends Shape {
     public void draw(Canvas canvas, FileWriter out) {
         canvas.drawCircle(mCenter, mRadius, mOutlineColor);
         canvas.fillCircle(mCenter, mRadius, mFillColor);
+    }
+
+    @Override
+    public void print(FileWriter out) throws IOException {
+
     }
 
     @Override

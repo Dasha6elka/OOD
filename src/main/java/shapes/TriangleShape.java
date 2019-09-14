@@ -4,6 +4,7 @@ import main.java.canvas.Canvas;
 import main.java.Point;
 
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -53,6 +54,10 @@ public class TriangleShape extends Shape {
         canvas.drawLine(mVertex2, mVertex3, mOutlineColor);
         canvas.drawLine(mVertex3, mVertex1, mOutlineColor);
         canvas.fillPolygon(Arrays.asList(mVertex1, mVertex2, mVertex3), mFillColor);
+    }
+
+    @Override
+    public void print(FileWriter out) throws IOException {
     }
 
     @Override
