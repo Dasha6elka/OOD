@@ -4,22 +4,22 @@ import main.java.Point;
 import main.java.shapes.Shape;
 
 public class MathDecoratorRectangle extends MathDecorator {
-    private Point mTopLeftVertex;
-    private Point mBottomRightVertex;
+    private Point topLeftVertex;
+    private Point bottomRightVertex;
 
     public MathDecoratorRectangle(Shape shape, Point topLeftVertex, Point bottomRightVertex) {
         super(shape);
-        mTopLeftVertex = topLeftVertex;
-        mBottomRightVertex = bottomRightVertex;
+        this.topLeftVertex = topLeftVertex;
+        this.bottomRightVertex = bottomRightVertex;
     }
 
     @Override
     public int getPerimeter() {
-        return (int) (2 * (mBottomRightVertex.x - mTopLeftVertex.x + mBottomRightVertex.y - mTopLeftVertex.y));
+        return (int) (2 * (bottomRightVertex.x - topLeftVertex.x + bottomRightVertex.y - topLeftVertex.y));
     }
 
     @Override
     public int getArea() {
-        return (int) ((mBottomRightVertex.x - mTopLeftVertex.x) * (mBottomRightVertex.y - mTopLeftVertex.y));
+        return (int) ((bottomRightVertex.x - topLeftVertex.x) * (bottomRightVertex.y - topLeftVertex.y));
     }
 }

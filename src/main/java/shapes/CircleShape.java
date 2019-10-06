@@ -3,19 +3,19 @@ package main.java.shapes;
 import main.java.Point;
 
 public class CircleShape implements Shape {
-    private int mRadius;
-    private Point mCenter;
+    private int radius;
+    private Point center;
 
     public CircleShape(Point center, int radius) {
-        mRadius = radius;
-        mCenter = center;
+        this.radius = radius;
+        this.center = center;
     }
 
     public int getRadius() {
-        return mRadius;
+        return radius;
     }
 
     public Point getCenter() {
-        return mCenter;
+        return center;
     }
 }
