@@ -1,6 +1,5 @@
 package main.java.decorators.print;
 
-import main.java.Point;
 import main.java.canvas.Canvas;
 import main.java.shapes.Shape;
 

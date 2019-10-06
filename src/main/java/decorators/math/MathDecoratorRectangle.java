@@ -1,7 +1,8 @@
 package main.java.decorators.math;
 
-import main.java.Point;
 import main.java.shapes.Shape;
+
+import java.awt.*;
 
 public class MathDecoratorRectangle extends MathDecorator {
     private Point topLeftVertex;
