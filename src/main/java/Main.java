@@ -1,7 +1,6 @@
 package main.java;
 
 import main.java.canvas.Canvas;
-import main.java.canvas.CanvasPanel;
 import main.java.canvas.J2DCanvas;
 import main.java.decorators.math.MathDecorator;
 import main.java.decorators.math.MathDecoratorCircle;
@@ -24,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
+import static javax.swing.JFrame.EXIT_ON_CLOSE;
 
 public class Main {
     private static final int FRAME_WIDTH = 1280;
@@ -49,8 +48,7 @@ public class Main {
                         String pointToken = restOfLineScanner.useDelimiter("=").next();
                         if (pointToken.contains("P") || pointToken.contains("C")) {
                             getPoint(points, restOfLineScanner);
-                        }
-                        else if (pointToken.contains("R")) {
+                        } else if (pointToken.contains("R")) {
                             circleRadius = getCircleRadius(restOfLineScanner);
                         }
                     }
@@ -140,11 +138,10 @@ public class Main {
     }
 
     private static void startUI(ArrayList<PrintDecorator> shapes, FileWriter out) {
-        EventQueue.invokeLater(() -> {
+        SwingUtilities.invokeLater(() -> {
             try {
                 J2DCanvas canvas = new J2DCanvas();
-                CanvasPanel panel = new CanvasPanel(canvas);
-                initUI(panel);
+                initUI(canvas);
                 draw(shapes, canvas, out);
                 out.close();
             } catch (IOException e) {
@@ -153,34 +150,32 @@ public class Main {
         });
     }
 
-    private static void initUI(CanvasPanel panel) {
+    private static void initUI(J2DCanvas panel) {
         JFrame frame = new JFrame();
         frame.setTitle(FRAME_TITLE);
-        frame.pack();
-        frame.setLocationByPlatform(true);
-        frame.setSize(new Dimension(FRAME_WIDTH, FRAME_HEIGHT));
-        frame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        frame.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        frame.getContentPane().add(panel);
+        frame.setSize(FRAME_WIDTH, FRAME_HEIGHT);
         frame.setVisible(true);
-        frame.add(panel);
     }
 
     private static void draw(List<PrintDecorator> shapes, Canvas canvas, FileWriter out) {
-        shapes.forEach(shape -> {
+        for (PrintDecorator shape : shapes) {
             try {
                 shape.draw(canvas, out);
             } catch (IOException e) {
-                System.out.println(e.getMessage());
+                e.printStackTrace();
             }
-        });
+        }
     }
 
     private static void printResult(ArrayList<PrintDecorator> shapes, FileWriter out) {
-        shapes.forEach(shape -> {
+        for (PrintDecorator shape : shapes) {
             try {
                 shape.print(out);
             } catch (IOException e) {
-                System.out.println(e.getMessage());
+                e.printStackTrace();
             }
-        });
+        }
     }
 }

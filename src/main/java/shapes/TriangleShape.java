@@ -1,6 +1,6 @@
 package main.java.shapes;
 
-import main.java.Point;
+import java.awt.*;
 
 public class TriangleShape implements Shape {
     private Point vertex1;

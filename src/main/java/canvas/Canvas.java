@@ -1,7 +1,5 @@
 package main.java.canvas;
 
-import main.java.Point;
-
 import java.awt.*;
 import java.util.List;
 
