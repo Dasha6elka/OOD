@@ -6,7 +6,10 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.*;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -19,15 +22,19 @@ import static java.awt.event.InputEvent.BUTTON3_DOWN_MASK;
 import static java.awt.event.MouseEvent.BUTTON1;
 
 public class J2DCanvas extends JComponent implements Canvas {
+    private final transient DragShapeAdapter drag = new DragShapeAdapter();
     private transient List<Item> items = new ArrayList<>();
     private boolean selecting = false;
+    private Point currPoint;
+    private Color selectionStrokeColor = new Color(33, 150, 243);
+    private Color selectionFillColor = new Color(33, 150, 243, 30);
+    private int selectionWidth = 1;
+    private transient BasicStroke selectionStroke = new BasicStroke(selectionWidth);
 
     public J2DCanvas() {
-        MouseAdapter mouseAdapter = new DragShapeAdapter();
-        KeyAdapter keyAdapter = new KeyShapeAdapter();
-        addMouseListener(mouseAdapter);
-        addMouseMotionListener(mouseAdapter);
-        addKeyListener(keyAdapter);
+        addMouseListener(drag);
+        addMouseMotionListener(drag);
+        addKeyListener(new KeyShapeAdapter());
     }
 
     @Override
@@ -63,32 +70,43 @@ public class J2DCanvas extends JComponent implements Canvas {
         int selectionBottomRightX = Integer.MIN_VALUE;
         int selectionBottomRightY = Integer.MIN_VALUE;
         for (Item item : items) {
-            AffineTransform saved = g2d.getTransform();
             item.paint(g2d);
-            g2d.setTransform(saved);
             if (item.isSelected()) {
                 Rectangle bounds = item.getBounds();
-                Point2D itemTopLeft = item.getTransform().transform(new Point(bounds.x, bounds.y), null);
-                Point2D itemBottomRight = item.getTransform().transform(new Point(bounds.x + bounds.width, bounds.y + bounds.height), null);
+                Point2D itemTopLeft = item.getTransformedPoint(new Point(bounds.x, bounds.y));
+                Point2D itemBottomRight = item.getTransformedPoint(new Point(bounds.x + bounds.width, bounds.y + bounds.height));
                 selectionTopLeftX = (int) Math.min(selectionTopLeftX, itemTopLeft.getX());
                 selectionTopLeftY = (int) Math.min(selectionTopLeftY, itemTopLeft.getY());
                 selectionBottomRightX = (int) Math.max(selectionBottomRightX, itemBottomRight.getX());
                 selectionBottomRightY = (int) Math.max(selectionBottomRightY, itemBottomRight.getY());
             }
         }
-        if (selectionTopLeftX != 0 &&
-                selectionTopLeftY != 0 &&
-                selectionBottomRightX != 0 &&
-                selectionBottomRightY != 0) {
-            g2d.setColor(Color.BLUE);
-            g2d.setStroke(new BasicStroke(2));
-            g2d.drawRect(
-                    selectionTopLeftX - 2,
-                    selectionTopLeftY - 2,
-                    selectionBottomRightX - selectionTopLeftX + 2,
-                    selectionBottomRightY - selectionTopLeftY + 2
-            );
+        g2d.setColor(selectionStrokeColor);
+        g2d.setStroke(selectionStroke);
+        g2d.drawRect(
+                selectionTopLeftX - selectionWidth,
+                selectionTopLeftY - selectionWidth,
+                selectionBottomRightX - selectionTopLeftX + selectionWidth,
+                selectionBottomRightY - selectionTopLeftY + selectionWidth
+        );
+        g2d.setColor(selectionFillColor);
+        g2d.fillRect(
+                selectionTopLeftX - selectionWidth,
+                selectionTopLeftY - selectionWidth,
+                selectionBottomRightX - selectionTopLeftX + selectionWidth,
+                selectionBottomRightY - selectionTopLeftY + selectionWidth
+        );
+    }
+
+    private Item findItem(Point2D point) {
+        ListIterator<Item> iter = items.listIterator(items.size());
+        while (iter.hasPrevious()) {
+            Item item = iter.previous();
+            if (item.containsPoint(point)) {
+                return item;
+            }
         }
+        return null;
     }
 
     private class KeyShapeAdapter extends KeyAdapter {
@@ -102,11 +120,20 @@ public class J2DCanvas extends JComponent implements Canvas {
                 items = items.stream().filter(item -> !item.isSelected()).collect(Collectors.toList());
                 CompositeItem composite = new CompositeItem(group);
                 items.add(composite);
+                drag.setHoverItem(composite);
                 repaint();
             }
             if (selecting && e.getKeyCode() == KeyEvent.VK_U) {
                 var selected = items.stream().filter(Item::isSelected).findFirst();
-                selected.ifPresent(item -> item.ungroup(items));
+                selected.ifPresent(item -> {
+                    item.unselect();
+                    item.ungroup(items);
+                });
+                Item hoverItem = findItem(currPoint);
+                if (hoverItem != null) {
+                    hoverItem.select();
+                    drag.setHoverItem(hoverItem);
+                }
                 repaint();
             }
         }
@@ -122,24 +149,28 @@ public class J2DCanvas extends JComponent implements Canvas {
     private class DragShapeAdapter extends MouseAdapter {
         private Item hoverItem;
         private boolean dragging;
-        private Point prevPoint;
         private Cursor savedCursor;
+
+        void setHoverItem(Item hoverItem) {
+            this.hoverItem = hoverItem;
+        }
 
         @Override
         public void mouseDragged(MouseEvent e) {
-            if (!dragging)
+            if (!dragging) {
                 return;
+            }
             // don't move item if both mouse buttons are pressed
             if ((e.getModifiersEx() & BUTTON3_DOWN_MASK) == 0) {
                 Point2D point = e.getPoint();
-                double tx = point.getX() - prevPoint.getX();
-                double ty = point.getY() - prevPoint.getY();
+                double tx = point.getX() - currPoint.getX();
+                double ty = point.getY() - currPoint.getY();
                 AffineTransform transform = AffineTransform.getTranslateInstance(tx, ty);
                 transform.concatenate(hoverItem.getTransform());
                 hoverItem.setTransform(transform);
                 repaint();
             }
-            prevPoint = new Point(e.getPoint());
+            currPoint = new Point(e.getPoint());
         }
 
         @Override
@@ -155,39 +186,17 @@ public class J2DCanvas extends JComponent implements Canvas {
             hoverItem = item;
         }
 
-        private Item findItem(Point2D point) {
-            ListIterator<Item> iter = items.listIterator(items.size());
-            while (iter.hasPrevious()) {
-                Item item = iter.previous();
-                if (item.containsPoint(point)) {
-                    return item;
-                }
-            }
-            return null;
-        }
-
         @Override
         public void mousePressed(MouseEvent e) {
+            if (!selecting) {
+                items.forEach(Item::unselect);
+            }
             if (e.getButton() == BUTTON1 && !dragging && hoverItem != null) {
                 dragging = true;
-                prevPoint = new Point(e.getPoint());
+                currPoint = new Point(e.getPoint());
                 var found = findItem(e.getPoint());
-                if (found != null && selecting) {
-                    if (found.isSelected()) {
-                        found.unselect();
-                    } else {
-                        found.select();
-                    }
-                } else {
-                    selecting = false;
-                    for (Item item : items) {
-                        item.unselect();
-                    }
-                }
-            } else {
-                selecting = false;
-                for (Item item : items) {
-                    item.unselect();
+                if (found != null) {
+                    found.select();
                 }
             }
             repaint();

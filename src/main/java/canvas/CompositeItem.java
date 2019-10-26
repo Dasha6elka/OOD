@@ -4,12 +4,19 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CompositeItem implements Item {
+    private AffineTransform at = new AffineTransform();
     private List<Item> items;
+    private List<AffineTransform> transforms;
 
     CompositeItem(List<Item> items) {
         this.items = items;
+        transforms = items
+                .stream()
+                .map(item -> new AffineTransform(item.getTransform()))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -34,13 +41,22 @@ public class CompositeItem implements Item {
 
     @Override
     public AffineTransform getTransform() {
-        return items.get(0).getTransform();
+        return at;
     }
 
     @Override
     public void setTransform(AffineTransform transform) {
+        at = transform;
+        int index = 0;
         for (Item item : items) {
-            item.setTransform(transform);
+            var currentItemTransform = transforms.get(index);
+            var currentTranslation = new Point((int) currentItemTransform.getTranslateX(), (int) currentItemTransform.getTranslateY());
+            var delta = transform.deltaTransform(currentTranslation, null);
+            var deltaTransform = AffineTransform.getTranslateInstance(delta.getX(), delta.getY());
+            var tempTransform = new AffineTransform(transform);
+            tempTransform.concatenate(deltaTransform);
+            item.setTransform(tempTransform);
+            index++;
         }
     }
 
@@ -58,8 +74,8 @@ public class CompositeItem implements Item {
         int selectionBottomRightY = Integer.MIN_VALUE;
         for (Item item : items) {
             Rectangle bounds = item.getBounds();
-            Point2D itemTopLeft = item.getTransform().transform(new Point(bounds.x, bounds.y), null);
-            Point2D itemBottomRight = item.getTransform().transform(new Point(bounds.x + bounds.width, bounds.y + bounds.height), null);
+            Point2D itemTopLeft = item.getTransformedPoint(new Point(bounds.x, bounds.y));
+            Point2D itemBottomRight = item.getTransformedPoint(new Point(bounds.x + bounds.width, bounds.y + bounds.height));
             selectionTopLeftX = (int) Math.min(selectionTopLeftX, itemTopLeft.getX());
             selectionTopLeftY = (int) Math.min(selectionTopLeftY, itemTopLeft.getY());
             selectionBottomRightX = (int) Math.max(selectionBottomRightX, itemBottomRight.getX());
@@ -70,6 +86,11 @@ public class CompositeItem implements Item {
         result.height = selectionBottomRightY - selectionTopLeftY;
         result.width = selectionBottomRightX - selectionTopLeftX;
         return result;
+    }
+
+    @Override
+    public Point getTransformedPoint(Point point) {
+        return point;
     }
 
     @Override

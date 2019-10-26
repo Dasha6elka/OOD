@@ -20,6 +20,8 @@ public interface Item {
 
     Rectangle getBounds();
 
+    Point getTransformedPoint(Point point);
+
     void select();
 
     void unselect();
