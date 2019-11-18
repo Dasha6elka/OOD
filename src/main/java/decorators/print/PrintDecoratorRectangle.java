@@ -14,7 +14,6 @@ public class PrintDecoratorRectangle extends PrintDecorator {
     private Point bottomRightVertex;
     private int perimeter;
     private int area;
-    private Color color = new Color(33, 33, 33);
 
     public PrintDecoratorRectangle(Shape shape, Point topLeftVertex, Point bottomRightVertex, int perimeter, int area) {
         super(shape);
@@ -25,11 +24,11 @@ public class PrintDecoratorRectangle extends PrintDecorator {
     }
 
     @Override
-    public void draw(Canvas canvas, FileWriter out) {
+    public void draw(Canvas canvas) {
         Point topRightVertex = new Point(bottomRightVertex.x, topLeftVertex.y);
         Point bottomLeftVertex = new Point(topLeftVertex.x, bottomRightVertex.y);
         List<Point> points = Arrays.asList(topLeftVertex, topRightVertex, bottomRightVertex, bottomLeftVertex);
-        canvas.drawPolygon(points, color);
+        canvas.drawPolygon(points, shape.getColor());
     }
 
     @Override

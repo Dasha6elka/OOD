@@ -16,11 +16,11 @@ public class MathDecoratorRectangle extends MathDecorator {
 
     @Override
     public int getPerimeter() {
-        return (int) (2 * (bottomRightVertex.x - topLeftVertex.x + bottomRightVertex.y - topLeftVertex.y));
+        return 2 * (bottomRightVertex.x - topLeftVertex.x + bottomRightVertex.y - topLeftVertex.y);
     }
 
     @Override
     public int getArea() {
-        return (int) ((bottomRightVertex.x - topLeftVertex.x) * (bottomRightVertex.y - topLeftVertex.y));
+        return (bottomRightVertex.x - topLeftVertex.x) * (bottomRightVertex.y - topLeftVertex.y);
     }
 }
